@@ -1,45 +1,67 @@
 package com.walletapp;
 
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+@Primary
+@Service
 public class WalletServiceImpl implements WalletService{
+    @Autowired
+    WalletRepository walletRepository;
     @Override
-    public WalletDto registerWallet(WalletDto wallet) throws WalletException {
-        return null;
+    public WalletDto registerWallet(WalletDto wallet) {
+        return walletRepository.save(wallet);
     }
 
     @Override
     public WalletDto getWalletById(Integer walletId) throws WalletException {
-        return null;
+         Optional<WalletDto> foundWallet=walletRepository.findById(walletId);
+         if(!foundWallet.isPresent())
+             throw new WalletException("wallet with given id :"+walletId+" doesn't exist");
+         return foundWallet.get();
     }
 
     @Override
     public WalletDto updateWallet(WalletDto wallet) throws WalletException {
-        return null;
+        Optional<WalletDto> foundWallet=walletRepository.findById(wallet.getId());
+        if(!foundWallet.isPresent())
+            throw new WalletException("wallet with given id :"+wallet.getId()+" doesn't exist to update");
+        return walletRepository.save(wallet);
     }
 
     @Override
     public WalletDto deleteWalletById(Integer walletId) throws WalletException {
-        return null;
+        Optional<WalletDto> foundWallet=walletRepository.findById(walletId);
+        if(foundWallet.isEmpty())
+            throw new WalletException("wallet with given id :"+walletId+" doesn't exist to delete");
+        WalletDto wallet=foundWallet.get();
+        walletRepository.deleteById(walletId);
+        return wallet;
+    }
+    @Override
+    public List<WalletDto> findAll() {
+        return walletRepository.findAll();
     }
 
     @Override
-    public Double addFundsToWalletById(Integer walletId, Double amount) throws WalletException {
-        return null;
+    public List<WalletDto> findByName(String name)
+    {
+        return walletRepository.findByName(name);
     }
-
-    @Override
-    public Double withdrawFundsFromWalletById(Integer walletById, Double amount) throws WalletException {
-        return null;
+    public List<WalletDto> findByNameContaining(String name)
+    {
+        return walletRepository.findByNameContaining(name);
     }
-
-    @Override
-    public Boolean fundTransfer(Integer fromWalletId, Integer toWalletId, Double amount) throws WalletException {
-        return null;
+    public List<WalletDto> findByBalanceBetweenOrderByBalanceDesc(Double min,Double max)
+    {
+       return walletRepository.findByBalance(min,max);
     }
-
-    @Override
-    public List<WalletDto> getAllWallets() {
-        return null;
+    public List<WalletDto> findByDateOfCreation(LocalDate date)
+    {
+        return walletRepository.findByDateOfCreation(date);
     }
 }
